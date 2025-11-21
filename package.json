@@ -10,7 +10,8 @@
   },
   "scripts": {
     "build": "esbuild src/map.ts --bundle --outfile=src/map.js --format=iife",
-    "start": "npm run build && http-server"
+    "start": "npm run build && http-server",
+    "deploy": "npm run build && git add . && git commit -m 'Deploy' && git push"
   },
   "dependencies": {
     "@types/mapbox-gl": "^3.4.1",

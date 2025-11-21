@@ -17,7 +17,7 @@
     return { x, y };
   }
   async function loadWorldGeoJSON() {
-    const response = await fetch("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson");
+    const response = await fetch("src/data/land.geojson");
     const data = await response.json();
     data.features = data.features.filter((feature) => {
       if (feature.geometry.type === "Polygon") {
@@ -189,7 +189,7 @@
     }
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
-    const response = await fetch("src/data/deduped_geocodes.csv");
+    const response = await fetch("src/data/birth_place_geocodes.csv");
     const csvText = await response.text();
     const lines = csvText.split("\n");
     for (let i = 1; i < lines.length; i++) {

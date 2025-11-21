@@ -42,7 +42,7 @@ function latLonToPixel(lat: number, lon: number, width: number, height: number):
 }
 
 async function loadWorldGeoJSON() {
-    const response = await fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson');
+    const response = await fetch('src/data/land.geojson');
     const data = await response.json();
     
     // Filter out Antarctica
