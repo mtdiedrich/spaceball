@@ -165,10 +165,10 @@
       ctx.textBaseline = "middle";
       const pulse = Math.sin(Date.now() / 500) * 0.3 + 0.7;
       ctx.globalAlpha = pulse;
-      ctx.fillText("\u2191", width / 2, height / 2);
+      ctx.fillText("\u2193", width / 2, height / 2);
       ctx.globalAlpha = 0.7;
       ctx.font = "24px sans-serif";
-      ctx.fillText("swipe up", width / 2, height / 2 + 60);
+      ctx.fillText("scroll", width / 2, height / 2 + 60);
       ctx.globalAlpha = 1;
     } else if (scrollPhase === "title") {
       let titleOpacity;
@@ -283,10 +283,6 @@
     });
     let currentYearIndex = -1;
     let scrollBuffer = 0;
-    let touchStartY = 0;
-    let touchEndY = 0;
-    let isTouchScrolling = false;
-    let lastTouchTime = 0;
     function handleScrollDown() {
       if (scrollPhase === "scroll-prompt") {
         scrollProgress += 0.05;
@@ -388,38 +384,6 @@
       } else {
         handleScrollUp();
       }
-    }, { passive: false });
-    let touchStartTime = 0;
-    window.addEventListener("touchstart", (event) => {
-      touchStartY = event.touches[0].clientY;
-      touchStartTime = Date.now();
-      isTouchScrolling = false;
-    }, { passive: false });
-    window.addEventListener("touchmove", (event) => {
-      event.preventDefault();
-      const touchY = event.touches[0].clientY;
-      const deltaY = touchStartY - touchY;
-      if (Math.abs(deltaY) > 10) {
-        isTouchScrolling = true;
-      }
-    }, { passive: false });
-    window.addEventListener("touchend", (event) => {
-      if (!isTouchScrolling)
-        return;
-      const currentTime = Date.now();
-      if (currentTime - lastTouchTime < 150)
-        return;
-      lastTouchTime = currentTime;
-      touchEndY = event.changedTouches[0].clientY;
-      const deltaY = touchStartY - touchEndY;
-      if (Math.abs(deltaY) > 20) {
-        if (deltaY > 0) {
-          handleScrollDown();
-        } else {
-          handleScrollUp();
-        }
-      }
-      isTouchScrolling = false;
     }, { passive: false });
   }
   initMap();

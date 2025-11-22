@@ -233,10 +233,10 @@ function render() {
         // Pulsing arrow animation
         const pulse = Math.sin(Date.now() / 500) * 0.3 + 0.7;
         ctx.globalAlpha = pulse;
-        ctx.fillText('↑', width / 2, height / 2);
+        ctx.fillText('↓', width / 2, height / 2);
         ctx.globalAlpha = 0.7;
         ctx.font = '24px sans-serif';
-        ctx.fillText('swipe up', width / 2, height / 2 + 60);
+        ctx.fillText('scroll', width / 2, height / 2 + 60);
         ctx.globalAlpha = 1;
         
     } else if (scrollPhase === 'title') {
@@ -395,10 +395,6 @@ async function initMap(): Promise<void> {
 
     let currentYearIndex = -1;
     let scrollBuffer = 0;
-    let touchStartY = 0;
-    let touchEndY = 0;
-    let isTouchScrolling = false;
-    let lastTouchTime = 0;
 
     function handleScrollDown() {
         if (scrollPhase === 'scroll-prompt') {
@@ -498,7 +494,7 @@ async function initMap(): Promise<void> {
         render();
     }
 
-    // Mouse wheel events
+    // Mouse wheel events only
     window.addEventListener('wheel', (event) => {
         event.preventDefault();
         
@@ -507,51 +503,6 @@ async function initMap(): Promise<void> {
         } else {
             handleScrollUp();
         }
-    }, { passive: false });
-
-    // Touch events for mobile - improved
-    let touchStartTime = 0;
-    
-    window.addEventListener('touchstart', (event) => {
-        touchStartY = event.touches[0].clientY;
-        touchStartTime = Date.now();
-        isTouchScrolling = false;
-    }, { passive: false });
-
-    window.addEventListener('touchmove', (event) => {
-        event.preventDefault();
-        const touchY = event.touches[0].clientY;
-        const deltaY = touchStartY - touchY;
-        
-        // Start scrolling if moved enough
-        if (Math.abs(deltaY) > 10) {
-            isTouchScrolling = true;
-        }
-    }, { passive: false });
-
-    window.addEventListener('touchend', (event) => {
-        if (!isTouchScrolling) return;
-        
-        const currentTime = Date.now();
-        // Debounce - prevent multiple triggers
-        if (currentTime - lastTouchTime < 150) return;
-        lastTouchTime = currentTime;
-        
-        touchEndY = event.changedTouches[0].clientY;
-        const deltaY = touchStartY - touchEndY;
-        
-        // Require minimum swipe distance
-        if (Math.abs(deltaY) > 20) {
-            if (deltaY > 0) {
-                // Swiped up - scroll down
-                handleScrollDown();
-            } else {
-                // Swiped down - scroll up
-                handleScrollUp();
-            }
-        }
-        
-        isTouchScrolling = false;
     }, { passive: false });
 }
 
