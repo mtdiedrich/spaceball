@@ -6,7 +6,7 @@ let years: string[] = [];
 let worldData: any = null;
 
 // Scroll phases
-let scrollPhase: 'title' | 'reveal-map' | 'locked-markers' | 'scroll-away' = 'title';
+let scrollPhase: 'scroll-prompt' | 'title' | 'reveal-map' | 'locked-markers' | 'final-summary' = 'scroll-prompt';
 let scrollProgress = 0;
 
 // Add at the top with other global variables
@@ -80,24 +80,32 @@ let centerHistory: Array<{year: string, lat: number, lon: number}> = [];
 
 // Add this function after loadWorldGeoJSON
 function calculateCenterForYear(year: string): {lat: number, lon: number} | null {
-    const yearMarkers = allMarkers.filter(m => m.year === year);
-    if (yearMarkers.length === 0) return null;
+    // Calculate center using all markers up to and including this year
+    const yearIdx = years.indexOf(year);
+    if (yearIdx < 0) return null;
+    
+    const markersUpToYear = allMarkers.filter(m => {
+        const markerYearIdx = years.indexOf(m.year);
+        return markerYearIdx >= 0 && markerYearIdx <= yearIdx;
+    });
+    
+    if (markersUpToYear.length === 0) return null;
     
     let totalLat = 0;
     let totalLon = 0;
-    yearMarkers.forEach(marker => {
+    markersUpToYear.forEach(marker => {
         totalLat += marker.lat;
         totalLon += marker.lon;
     });
     
     return {
-        lat: totalLat / yearMarkers.length,
-        lon: totalLon / yearMarkers.length
+        lat: totalLat / markersUpToYear.length,
+        lon: totalLon / markersUpToYear.length
     };
 }
 
-// Update the drawMap function
-function drawMap(mapY: number, opacity: number) {
+// Update the drawMap function with improved visual hierarchy
+function drawMap(mapY: number, opacity: number, revealProgress: number = 1) {
     if (!worldData) return;
     
     const width = canvas.width;
@@ -111,7 +119,8 @@ function drawMap(mapY: number, opacity: number) {
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, width, height);
     
-    // Draw land on top
+    // Draw land on top with fade-in during reveal
+    ctx.globalAlpha = opacity * revealProgress;
     ctx.fillStyle = '#ffffff';
     
     worldData.features.forEach((feature: any) => {
@@ -128,10 +137,16 @@ function drawMap(mapY: number, opacity: number) {
         }
     });
     
-    // Draw red line connecting center positions through current year
-    if (centerHistory.length > 0) {
-        ctx.strokeStyle = '#ff0000';
-        ctx.lineWidth = 2;
+    ctx.globalAlpha = opacity;
+    
+    // Draw red trail connecting center positions through current year (EMPHASIZED)
+    if (centerHistory.length > 0 && revealProgress > 0.5) {
+        const trailOpacity = Math.min(1, (revealProgress - 0.5) * 2);
+        ctx.globalAlpha = opacity * trailOpacity;
+        ctx.strokeStyle = '#ff3333';
+        ctx.lineWidth = 4; // Thicker trail
+        ctx.shadowColor = '#ff0000';
+        ctx.shadowBlur = 8;
         ctx.beginPath();
         
         const currentYearIdx = years.indexOf(currentYear);
@@ -147,38 +162,55 @@ function drawMap(mapY: number, opacity: number) {
         });
         
         ctx.stroke();
+        ctx.shadowBlur = 0;
     }
     
-    // Calculate and draw current center
-    const currentYearMarkers = allMarkers.filter(m => m.year === currentYear);
-    if (currentYearMarkers.length > 0) {
+    ctx.globalAlpha = opacity;
+    
+    // Calculate and draw current center (based on all locations up to current year)
+    const currentYearIdx = years.indexOf(currentYear);
+    const markersUpToCurrent = allMarkers.filter(m => {
+        const markerYearIdx = years.indexOf(m.year);
+        return markerYearIdx >= 0 && markerYearIdx <= currentYearIdx;
+    });
+    
+    if (markersUpToCurrent.length > 0 && revealProgress === 1) {
         let totalLat = 0;
         let totalLon = 0;
-        currentYearMarkers.forEach(marker => {
+        markersUpToCurrent.forEach(marker => {
             totalLat += marker.lat;
             totalLon += marker.lon;
         });
-        const centerLat = totalLat / currentYearMarkers.length;
-        const centerLon = totalLon / currentYearMarkers.length;
+        const centerLat = totalLat / markersUpToCurrent.length;
+        const centerLon = totalLon / markersUpToCurrent.length;
         
-        // Draw blue center marker (larger)
+        // Draw blue center marker (prominent with glow)
         const centerPos = latLonToPixel(centerLat, centerLon, width, height);
+        ctx.shadowColor = '#0066ff';
+        ctx.shadowBlur = 15;
         ctx.fillStyle = '#0066ff';
         ctx.beginPath();
-        ctx.arc(centerPos.x, centerPos.y, 8, 0, Math.PI * 2);
+        ctx.arc(centerPos.x, centerPos.y, 10, 0, Math.PI * 2);
         ctx.fill();
+        ctx.shadowBlur = 0;
     }
     
-    // Draw individual markers
-    ctx.fillStyle = '#1aff00ff';
-    allMarkers.forEach(marker => {
-        if (marker.year === currentYear) {
-            const pos = latLonToPixel(marker.lat, marker.lon, width, height);
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    });
+    // Draw individual markers (smaller and more transparent)
+    // Show all markers up to and including current year
+    if (revealProgress === 1) {
+        ctx.globalAlpha = opacity * 0.4; // More transparent
+        ctx.fillStyle = '#1aff00';
+        const currentYearIdx = years.indexOf(currentYear);
+        allMarkers.forEach(marker => {
+            const markerYearIdx = years.indexOf(marker.year);
+            if (markerYearIdx >= 0 && markerYearIdx <= currentYearIdx) {
+                const pos = latLonToPixel(marker.lat, marker.lon, width, height);
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2); // Smaller
+                ctx.fill();
+            }
+        });
+    }
     
     ctx.restore();
 }
@@ -191,22 +223,54 @@ function render() {
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, width, height);
     
-    if (scrollPhase === 'title') {
-        // Show title
+    if (scrollPhase === 'scroll-prompt') {
+        // Show scroll indicator
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '32px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Pulsing arrow animation
+        const pulse = Math.sin(Date.now() / 500) * 0.3 + 0.7;
+        ctx.globalAlpha = pulse;
+        ctx.fillText('↓', width / 2, height / 2);
+        ctx.globalAlpha = 0.6;
+        ctx.font = '18px sans-serif';
+        ctx.fillText('scroll', width / 2, height / 2 + 50);
+        ctx.globalAlpha = 1;
+        
+    } else if (scrollPhase === 'title') {
+        // Title fades in then fades out
+        let titleOpacity;
+        if (scrollProgress < 0.5) {
+            // Fade in during first half
+            titleOpacity = scrollProgress * 2;
+        } else {
+            // Fade out during second half
+            titleOpacity = (1 - scrollProgress) * 2;
+        }
+        
+        ctx.globalAlpha = titleOpacity;
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 72px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('The World of Basketball', width / 2, height / 2);
+        ctx.fillText('Basketball\'s Global Journey', width / 2, height / 2 - 40);
+        
+        // Subtitle
+        ctx.font = '32px sans-serif';
+        ctx.fillStyle = '#cccccc';
+        ctx.fillText('Following the sport\'s shifting center across decades', width / 2, height / 2 + 40);
+        ctx.globalAlpha = 1;
         
     } else if (scrollPhase === 'reveal-map') {
-        // Map sliding up from bottom
+        // Map sliding up from bottom with progressive reveal
         const mapY = height * (1 - scrollProgress);
-        drawMap(mapY, 1);
+        drawMap(mapY, 1, scrollProgress);
         
     } else if (scrollPhase === 'locked-markers') {
         // Map locked at top, showing markers
-        drawMap(0, 1);
+        drawMap(0, 1, 1);
         
         // Calculate distance up to current year
         const currentYearIdx = years.indexOf(currentYear);
@@ -218,28 +282,47 @@ function render() {
         }
         totalMilesCovered = distance;
         
-    } else if (scrollPhase === 'scroll-away') {
-        // Map scrolling up and away
-        const mapY = -height * scrollProgress;
-        drawMap(mapY, 1 - scrollProgress);
+    } else if (scrollPhase === 'final-summary') {
+        // Show full trail with summary statistics
+        drawMap(0, 1, 1);
+        
+        // Draw semi-transparent overlay
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, width, height);
+        
+        // Summary text
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 56px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        const totalDistance = Math.round(totalMilesCovered).toLocaleString();
+        const yearSpan = years.length > 0 ? `${years[0]} - ${years[years.length - 1]}` : '';
+        
+        ctx.fillText(`${totalDistance} miles`, width / 2, height / 2 - 80);
+        
+        ctx.font = '32px sans-serif';
+        ctx.fillStyle = '#cccccc';
+        ctx.fillText(`traveled across ${yearSpan}`, width / 2, height / 2 - 20);
+        ctx.fillText(`${allMarkers.length.toLocaleString()} events tracked`, width / 2, height / 2 + 40);
     }
     
     // Update year display
     const yearDisplay = document.getElementById('year-display') as HTMLElement;
-    if (scrollPhase === 'locked-markers' || scrollPhase === 'scroll-away') {
+    if (scrollPhase === 'locked-markers') {
         yearDisplay.style.display = 'block';
         yearDisplay.textContent = currentYear || '----';
     } else {
         yearDisplay.style.display = 'none';
     }
     
-    // Show miles in bottom left
-    if (scrollPhase === 'locked-markers' || scrollPhase === 'scroll-away') {
+    // Show miles in bottom left (larger and more prominent)
+    if (scrollPhase === 'locked-markers') {
         ctx.fillStyle = '#ffffff';
-        ctx.font = '24px sans-serif';
+        ctx.font = 'bold 32px sans-serif';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
-        ctx.fillText(`${Math.round(totalMilesCovered).toLocaleString()} miles`, 20, height - 20);
+        ctx.fillText(`${Math.round(totalMilesCovered).toLocaleString()} miles`, 30, height - 30);
     }
 }
 
@@ -271,6 +354,15 @@ async function initMap(): Promise<void> {
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
     
+    // Animation loop for pulsing scroll indicator
+    function animate() {
+        if (scrollPhase === 'scroll-prompt') {
+            render();
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
+    
     const response = await fetch('src/data/birth_place_geocodes.csv');
     const csvText = await response.text();
     const lines = csvText.split('\n');
@@ -293,7 +385,6 @@ async function initMap(): Promise<void> {
     allMarkers.forEach(m => uniqueYears.add(m.year));
     years = Array.from(uniqueYears).sort();
     
-    // In initMap, after building the years array, add:
     // Build center history for all years
     years.forEach(year => {
         const center = calculateCenterForYear(year);
@@ -303,105 +394,142 @@ async function initMap(): Promise<void> {
     });
 
     let currentYearIndex = -1;
-    let scrollBuffer = 0; // Buffer to slow down year progression
+    let scrollBuffer = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
 
+    function handleScrollDown() {
+        if (scrollPhase === 'scroll-prompt') {
+            scrollProgress += 0.05;
+            if (scrollProgress >= 1) {
+                scrollProgress = 0;
+                scrollPhase = 'title';
+            }
+        } else if (scrollPhase === 'title') {
+            scrollProgress += 0.02;
+            if (scrollProgress >= 1) {
+                scrollProgress = 0;
+                scrollPhase = 'reveal-map';
+            }
+        } else if (scrollPhase === 'reveal-map') {
+            scrollProgress += 0.04;
+            if (scrollProgress >= 1) {
+                scrollProgress = 0;
+                scrollPhase = 'locked-markers';
+                scrollBuffer = 0;
+            }
+        } else if (scrollPhase === 'locked-markers') {
+            if (scrollBuffer < 2) {
+                scrollBuffer++;
+                render();
+                return;
+            }
+            
+            if (currentYearIndex < years.length - 1) {
+                scrollBuffer += 1;
+                if (scrollBuffer >= 2) {
+                    currentYearIndex++;
+                    currentYear = years[currentYearIndex];
+                    scrollBuffer = 0;
+                }
+            } else {
+                scrollBuffer++;
+                if (scrollBuffer >= 5) {
+                    scrollPhase = 'final-summary';
+                    scrollProgress = 0;
+                    scrollBuffer = 0;
+                }
+            }
+        } else if (scrollPhase === 'final-summary') {
+            scrollProgress = Math.min(scrollProgress + 0.02, 1);
+        }
+        render();
+    }
+
+    function handleScrollUp() {
+        if (scrollPhase === 'final-summary') {
+            scrollBuffer++;
+            if (scrollBuffer >= 3) {
+                scrollPhase = 'locked-markers';
+                currentYearIndex = years.length - 1;
+                currentYear = years[currentYearIndex];
+                scrollBuffer = 0;
+            }
+        } else if (scrollPhase === 'locked-markers') {
+            if (currentYearIndex === years.length - 1 && scrollBuffer < 2) {
+                scrollBuffer++;
+                render();
+                return;
+            }
+            
+            if (currentYearIndex > -1) {
+                scrollBuffer += 1;
+                if (scrollBuffer >= 2) {
+                    currentYearIndex--;
+                    currentYear = currentYearIndex >= 0 ? years[currentYearIndex] : '';
+                    scrollBuffer = 0;
+                }
+            } else {
+                scrollBuffer++;
+                if (scrollBuffer >= 2) {
+                    scrollPhase = 'reveal-map';
+                    scrollProgress = 1;
+                    scrollBuffer = 0;
+                }
+            }
+        } else if (scrollPhase === 'reveal-map') {
+            scrollProgress -= 0.04;
+            if (scrollProgress <= 0) {
+                scrollPhase = 'title';
+                scrollProgress = 1;
+            }
+        } else if (scrollPhase === 'title') {
+            scrollProgress -= 0.02;
+            if (scrollProgress <= 0) {
+                scrollPhase = 'scroll-prompt';
+                scrollProgress = 0;
+            }
+        } else if (scrollPhase === 'scroll-prompt') {
+            scrollProgress -= 0.05;
+            scrollProgress = Math.max(scrollProgress, 0);
+        }
+        render();
+    }
+
+    // Mouse wheel events
     window.addEventListener('wheel', (event) => {
         event.preventDefault();
         
         if (event.deltaY > 0) {
-            // Scrolling down
-            if (scrollPhase === 'title') {
-                scrollProgress += 0.1; // Much faster to get past title
-                if (scrollProgress >= 1) {
-                    scrollProgress = 0;
-                    scrollPhase = 'reveal-map';
-                }
-            } else if (scrollPhase === 'reveal-map') {
-                scrollProgress += 0.05;
-                if (scrollProgress >= 1) {
-                    scrollProgress = 0;
-                    scrollPhase = 'locked-markers';
-                    scrollBuffer = 0; // Reset buffer when entering locked phase
-                }
-            } else if (scrollPhase === 'locked-markers') {
-                // Add pause at start of locked phase
-                if (scrollBuffer < 3) {
-                    scrollBuffer++;
-                    render();
-                    return;
-                }
-                
-                // Advance years (slower)
-                if (currentYearIndex < years.length - 1) {
-                    scrollBuffer += 1;
-                    if (scrollBuffer >= 3) { // Require 5 scroll ticks per year
-                        currentYearIndex++;
-                        currentYear = years[currentYearIndex];
-                        scrollBuffer = 0;
-                    }
-                } else {
-                    // Add pause before unlocking
-                    scrollBuffer++;
-                    if (scrollBuffer >= 8) {
-                        scrollPhase = 'scroll-away';
-                        scrollProgress = 0;
-                        scrollBuffer = 0;
-                    }
-                }
-            } else if (scrollPhase === 'scroll-away') {
-                scrollProgress += 0.03;
-                scrollProgress = Math.min(scrollProgress, 1);
-            }
+            handleScrollDown();
         } else {
-            // Scrolling up
-            if (scrollPhase === 'scroll-away') {
-                // Add pause before re-locking
-                if (scrollProgress > 0) {
-                    scrollProgress -= 0.03;
-                } else {
-                    scrollBuffer++;
-                    if (scrollBuffer >= 3) {
-                        scrollPhase = 'locked-markers';
-                        scrollProgress = 0;
-                        scrollBuffer = 0;
-                    }
-                }
-            } else if (scrollPhase === 'locked-markers') {
-                // Add pause at end of locked phase
-                if (currentYearIndex === years.length - 1 && scrollBuffer < 3) {
-                    scrollBuffer++;
-                    render();
-                    return;
-                }
-                
-                if (currentYearIndex > -1) {
-                    scrollBuffer += 1;
-                    if (scrollBuffer >= 1) { // Require 5 scroll ticks per year
-                        currentYearIndex--;
-                        currentYear = currentYearIndex >= 0 ? years[currentYearIndex] : '';
-                        scrollBuffer = 0;
-                    }
-                } else {
-                    scrollBuffer++;
-                    if (scrollBuffer >= 1) {
-                        scrollPhase = 'reveal-map';
-                        scrollProgress = 1;
-                        scrollBuffer = 0;
-                    }
-                }
-            } else if (scrollPhase === 'reveal-map') {
-                scrollProgress -= 0.05;
-                if (scrollProgress <= 0) {
-                    scrollPhase = 'title';
-                    scrollProgress = 0;
-                }
-            } else if (scrollPhase === 'title') {
-                scrollProgress -= 0.1;
-                scrollProgress = Math.max(scrollProgress, 0);
+            handleScrollUp();
+        }
+    }, { passive: false });
+
+    // Touch events for mobile
+    window.addEventListener('touchstart', (event) => {
+        touchStartY = event.touches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (event) => {
+        event.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('touchend', (event) => {
+        touchEndY = event.changedTouches[0].clientY;
+        const deltaY = touchStartY - touchEndY;
+        
+        // Require minimum swipe distance
+        if (Math.abs(deltaY) > 30) {
+            if (deltaY > 0) {
+                // Swiped up - scroll down
+                handleScrollDown();
+            } else {
+                // Swiped down - scroll up
+                handleScrollUp();
             }
         }
-        
-        render();
     }, { passive: false });
 }
 
