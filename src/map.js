@@ -171,21 +171,30 @@
       ctx.fillText("scroll", width / 2, height / 2 + 60);
       ctx.globalAlpha = 1;
     } else if (scrollPhase === "title") {
-      let titleOpacity;
-      if (scrollProgress < 0.5) {
-        titleOpacity = scrollProgress * 2;
+      let titleOpacity = 0;
+      let subtitleOpacity = 0;
+      let scrollUpOffset = 0;
+      if (scrollProgress < 0.3) {
+        titleOpacity = scrollProgress / 0.3;
+        subtitleOpacity = 0;
+      } else if (scrollProgress < 0.6) {
+        titleOpacity = 1;
+        subtitleOpacity = (scrollProgress - 0.3) / 0.3;
       } else {
-        titleOpacity = (1 - scrollProgress) * 2;
+        titleOpacity = 1;
+        subtitleOpacity = 1;
+        scrollUpOffset = (scrollProgress - 0.6) / 0.4 * height;
       }
       ctx.globalAlpha = titleOpacity;
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 72px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("Basketball's Global Journey", width / 2, height / 2 - 40);
+      ctx.fillText("The World of Basketball", width / 2, height / 2 - 40 - scrollUpOffset);
+      ctx.globalAlpha = subtitleOpacity;
       ctx.font = "32px sans-serif";
       ctx.fillStyle = "#cccccc";
-      ctx.fillText("Following the sport's shifting center across decades", width / 2, height / 2 + 40);
+      ctx.fillText("An Essay About Human Extinction", width / 2, height / 2 + 40 - scrollUpOffset);
       ctx.globalAlpha = 1;
     } else if (scrollPhase === "reveal-map") {
       const mapY = height * (1 - scrollProgress);

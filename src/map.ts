@@ -240,14 +240,24 @@ function render() {
         ctx.globalAlpha = 1;
         
     } else if (scrollPhase === 'title') {
-        // Title fades in then fades out
-        let titleOpacity;
-        if (scrollProgress < 0.5) {
-            // Fade in during first half
-            titleOpacity = scrollProgress * 2;
+        // Title and subtitle fade in sequentially, then scroll up together
+        let titleOpacity = 0;
+        let subtitleOpacity = 0;
+        let scrollUpOffset = 0;
+        
+        if (scrollProgress < 0.3) {
+            // Title fades in (0-0.3)
+            titleOpacity = scrollProgress / 0.3;
+            subtitleOpacity = 0;
+        } else if (scrollProgress < 0.6) {
+            // Subtitle fades in (0.3-0.6)
+            titleOpacity = 1;
+            subtitleOpacity = (scrollProgress - 0.3) / 0.3;
         } else {
-            // Fade out during second half
-            titleOpacity = (1 - scrollProgress) * 2;
+            // Both scroll up (0.6-1.0)
+            titleOpacity = 1;
+            subtitleOpacity = 1;
+            scrollUpOffset = ((scrollProgress - 0.6) / 0.4) * height;
         }
         
         ctx.globalAlpha = titleOpacity;
@@ -255,12 +265,12 @@ function render() {
         ctx.font = 'bold 72px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('Basketball\'s Global Journey', width / 2, height / 2 - 40);
+        ctx.fillText('The World of Basketball', width / 2, height / 2 - 40 - scrollUpOffset);
         
-        // Subtitle
+        ctx.globalAlpha = subtitleOpacity;
         ctx.font = '32px sans-serif';
         ctx.fillStyle = '#cccccc';
-        ctx.fillText('Following the sport\'s shifting center across decades', width / 2, height / 2 + 40);
+        ctx.fillText('An Essay About Human Extinction', width / 2, height / 2 + 40 - scrollUpOffset);
         ctx.globalAlpha = 1;
         
     } else if (scrollPhase === 'reveal-map') {
