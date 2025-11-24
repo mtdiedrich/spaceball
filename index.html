@@ -1,84 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Now Boarding: Terminal 4</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    <title>Sit down. Stay a while.</title>
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script type="importmap">
+    {
+        "imports": {
+            "d3": "https://cdn.jsdelivr.net/npm/d3@7.8.5/+esm",
+            "scrollama": "https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm",
+            "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm",
+            "gsap/ScrollTrigger": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"
         }
-        html, body {
-            height: 100%;
-            width: 100%;
-        }
-        
-        #map {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        
-        #scroll-container {
-            position: relative;
-            z-index: 2;
-            pointer-events: none;
-        }
-        
-        .step {
-            height: 100vh;
-            pointer-events: all;
-        }
-        
-        #year-display {
-            position: fixed;
-            top: 40px;
-            right: 40px;
-            background: transparent;
-            padding: 0;
-            font-size: 24px;
-            font-weight: normal;
-            font-family: monospace;
-            color: rgba(255, 255, 255, 0.6);
-            z-index: 1000;
-            letter-spacing: 2px;
-            display: none;
-        }
-        
-        #miles-display {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            font-size: 32px;
-            font-weight: bold;
-            font-family: sans-serif;
-            color: #ffffff;
-            z-index: 1000;
-            display: none;
-        }
-    </style>
-    <link rel="icon" href="icons/favicon.ico" sizes="32x32">
-    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    }
+    </script>
 </head>
 <body>
-    <canvas id="map"></canvas>
+
+    <!-- Scene 1: Title -->
+    <section id="scene-1">
+        <div>
+            <h1>The World of Basketball</h1>
+            <p>An Essay About a Decaying Empire</p>
+            <p class="scroll-prompt">Scroll down to begin</p>
+        </div>
+    </section>
+
+    <!-- Scene 2: Two column layout -->
+    <section id="scene-2">
+        <div class="two-column-container">
+            <!-- Left column: sticky content with switching items -->
+            <div class="left-column">
+                <div class="spacer"></div>
+                <div class="sticky-content">
+                    <div class="sticky-item active" data-item="0">
+                        <!-- <h2>Item 1</h2> -->
+                        <p>On 21 May 2025, Oklahoma City Thunder guard Shai Gilgeous-Alexander (colloquially, SGA) accepted the Michael Jordan trophy, awarded to the National Basketball Association's Most Valuable Player.</p>
+                    </div>
+                    <div class="sticky-item" data-item="1">
+                        <!-- <h2>Item 2</h2> -->
+                        <p>SGA received 913 of a possible 1000 points from MVP voters, fueled by his 32.7 points per game that propelled the Thunder to a 68-14 record and the number one seed in the Western Conference.</p>
+                    </div>
+                    <div class="sticky-item" data-item="2">
+                        <!-- <h2>Item 3</h2> -->
+                        <p>SGA would go on to lead the Thunder to a victory in the NBA Finals, becoming the 11th player to win both the regular season and Finals MVP awards in the same season. </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right side: 3 overlapping columns with different scroll speeds -->
+            <div class="right-column">
+                <div class="parallax-wrapper">
+
+                    <!-- Background layer (no triggers) -->
+                    <div class="parallax-layer layer-back">
+                        <div class="scroll-content">
+                            <div class="content-block sticky-block">
+                                <img src="assets/images/sga1.png" alt="SGA 1">
+                                <h3>Background 1</h3>
+                                <p>This locks in place when centered</p>
+                            </div>
+                            <!-- Large spacer to keep background locked longer -->
+                            <div style="height: 300vh;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Middle layer (all triggers) -->
+                    <div class="parallax-layer layer-middle">
+                        <!-- Add spacer at top so first block appears later -->
+                        <div style="height: 150vh;"></div>
+                        <div class="content-block" data-layer="middle" data-step="1">
+                            <h3>Middle 1</h3>
+                            <p>Triggers left item 1 (transition from item 0 to item 1)</p>
+                        </div>
+                        <div class="content-block" data-layer="middle" data-step="2">
+                            <h3>Middle 2</h3>
+                            <p>Triggers left item 2</p>
+                        </div>
+                        <div class="content-block" data-layer="middle" data-step="3">
+                            <h3>Middle 3</h3>
+                            <p>Triggers left item 3</p>
+                        </div>
+                    </div>
+
+                    <!-- Foreground layer (no triggers) -->
+                    <div class="parallax-layer layer-front">
+                        <!-- Add spacer at top -->
+                        <div style="height: 200vh;"></div>
+                        <div class="content-block" data-layer="front">
+                            <h3>Front 1</h3>
+                            <p>No trigger</p>
+                        </div>
+                        <div class="content-block" data-layer="front">
+                            <h3>Front 2</h3>
+                            <p>No trigger</p>
+                        </div>
+                        <div class="content-block" data-layer="front">
+                            <h3>Front 3</h3>
+                            <p>No trigger</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
     
-    <div id="scroll-container">
-        <div class="step" id="intro-step"></div>
-        <div class="step" id="map-step"></div>
-        <!-- Will add year steps dynamically -->
-    </div>
-    
-    <div id="year-display">----</div>
-    <div id="miles-display"></div>
-    
-    <script src="src/map.js"></script>
+    <script type="module" src="dist/main.js"></script>
 </body>
 </html>

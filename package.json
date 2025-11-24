@@ -1,23 +1,46 @@
 {
-  "name": "my-map-project",
+  "name": "intbb",
   "version": "1.0.0",
-  "devDependencies": {
-    "@types/google.maps": "^3.54.0",
-    "@types/leaflet": "^1.9.0",
-    "esbuild": "^0.19.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "cheap-ruler": "^4.0.0",
+    "csscolorparser": "^1.0.3",
+    "d3": "^7.9.0",
+    "earcut": "^3.0.2",
+    "esbuild": "^0.19.12",
+    "geojson-vt": "^4.0.2",
+    "gl-matrix": "^3.4.4",
+    "grid-index": "^1.1.0",
+    "gsap": "^3.13.0",
+    "intersection-observer": "^0.12.2",
+    "kdbush": "^4.0.2",
     "leaflet": "^1.9.4",
-    "typescript": "^5.0.0"
+    "mapbox-gl": "^3.16.0",
+    "martinez-polygon-clipping": "^0.7.4",
+    "murmurhash-js": "^1.0.0",
+    "pbf": "^4.0.1",
+    "potpack": "^2.1.0",
+    "protocol-buffers-schema": "^3.6.0",
+    "quickselect": "^3.0.0",
+    "resolve-protobuf-schema": "^2.1.0",
+    "robust-predicates": "^2.0.4",
+    "scrollama": "^3.2.0",
+    "serialize-to-js": "^3.1.2",
+    "splaytree": "^0.1.4",
+    "supercluster": "^8.0.1",
+    "tinyqueue": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4"
   },
   "scripts": {
-    "build": "esbuild src/map.ts --bundle --outfile=src/map.js --format=iife",
-    "start": "npm run build && http-server",
-    "deploy": "npm run build && git add . && git commit -m 'Deploy' && git push"
+      "dev": "tsc && vite",
+      "build": "tsc && vite build"
   },
-  "dependencies": {
-    "@types/mapbox-gl": "^3.4.1",
-    "intersection-observer": "^0.12.2",
-    "mapbox-gl": "^3.16.0",
-    "scrollama": "^3.2.0"
-  }
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
-
