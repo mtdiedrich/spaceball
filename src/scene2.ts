@@ -12,13 +12,12 @@ export function initScene2() {
     // Item 1 starts visible
     gsap.set(stickyItems[0], { opacity: 1 });
     
-    // Keep parallax for middle and front layers
+    // Keep parallax for middle layer only
     const middleLayer = document.querySelector('.layer-middle');
-    const frontLayer = document.querySelector('.layer-front');
     
     if (middleLayer) {
         gsap.to(middleLayer, {
-            y: -400,
+            y: -800,
             ease: 'none',
             scrollTrigger: {
                 trigger: '#scene-2',
@@ -28,21 +27,6 @@ export function initScene2() {
             }
         });
     }
-    
-    if (frontLayer) {
-        gsap.to(frontLayer, {
-            y: -8000,
-            ease: 'none',
-            scrollTrigger: {
-                trigger: '#scene-2',
-                start: 'top top',
-                end: 'bottom bottom',
-                scrub: true
-            }
-        });
-    }
-            
-    // No need to pin sticky-content separately - it's now inside sticky-block and moves with it
     
     // Only use content blocks with data-step as triggers
     const triggerBlocks = document.querySelectorAll('#scene-2 .content-block[data-step]');

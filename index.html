@@ -6,20 +6,8 @@
     <title>Sit down. Stay a while.</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="css/style.css">
-    
-    <script type="importmap">
-    {
-        "imports": {
-            "d3": "https://cdn.jsdelivr.net/npm/d3@7.8.5/+esm",
-            "scrollama": "https://cdn.jsdelivr.net/npm/scrollama@3.2.0/+esm",
-            "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm",
-            "gsap/ScrollTrigger": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"
-        }
-    }
-    </script>
 </head>
 <body>
-
     <!-- Scene 1: Title -->
     <section id="scene-1">
         <div>
@@ -39,7 +27,6 @@
             <!-- Right side: 3 overlapping columns with different scroll speeds -->
             <div class="right-column">
                 <div class="parallax-wrapper">
-
                     <!-- Background layer (no triggers) -->
                     <div class="parallax-layer layer-back">
                         <div class="scroll-content">
@@ -81,12 +68,11 @@
                             <p>Triggers left item 3</p>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </section>
     
-    <script type="module" src="dist/main.js"></script>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

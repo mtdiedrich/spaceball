@@ -33,12 +33,14 @@
   },
   "devDependencies": {
     "@types/d3": "^7.4.3",
+    "install": "^0.13.0",
     "typescript": "^5.9.3",
+    "typescriptnpm": "^1.0.1",
     "vite": "^7.2.4"
   },
   "scripts": {
-      "dev": "tsc && vite",
-      "build": "tsc && vite build"
+    "dev": "tsc && vite",
+    "build": "tsc && vite build"
   },
   "keywords": [],
   "author": "",
