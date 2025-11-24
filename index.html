@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sit down. Stay a while.</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="css/style.css">
     
     <script type="importmap">
@@ -30,23 +32,8 @@
     <!-- Scene 2: Two column layout -->
     <section id="scene-2">
         <div class="two-column-container">
-            <!-- Left column: sticky content with switching items -->
+            <!-- Left column: empty spacer -->
             <div class="left-column">
-                <div class="spacer"></div>
-                <div class="sticky-content">
-                    <div class="sticky-item active" data-item="0">
-                        <!-- <h2>Item 1</h2> -->
-                        <p>On 21 May 2025, Oklahoma City Thunder guard Shai Gilgeous-Alexander (colloquially, SGA) accepted the Michael Jordan trophy, awarded to the National Basketball Association's Most Valuable Player.</p>
-                    </div>
-                    <div class="sticky-item" data-item="1">
-                        <!-- <h2>Item 2</h2> -->
-                        <p>SGA received 913 of a possible 1000 points from MVP voters, fueled by his 32.7 points per game that propelled the Thunder to a 68-14 record and the number one seed in the Western Conference.</p>
-                    </div>
-                    <div class="sticky-item" data-item="2">
-                        <!-- <h2>Item 3</h2> -->
-                        <p>SGA would go on to lead the Thunder to a victory in the NBA Finals, becoming the 11th player to win both the regular season and Finals MVP awards in the same season. </p>
-                    </div>
-                </div>
             </div>
             
             <!-- Right side: 3 overlapping columns with different scroll speeds -->
@@ -56,10 +43,21 @@
                     <!-- Background layer (no triggers) -->
                     <div class="parallax-layer layer-back">
                         <div class="scroll-content">
-                            <div class="content-block sticky-block">
-                                <img src="assets/images/sga1.png" alt="SGA 1">
-                                <h3>Background 1</h3>
-                                <p>This locks in place when centered</p>
+                            <div class="sticky-block">
+                                <div class="sticky-content">
+                                    <div class="sticky-item active" data-item="0">
+                                        <p>On 21 May 2025, Oklahoma City Thunder guard Shai Gilgeous-Alexander (colloquially, SGA) accepted the Michael Jordan trophy, awarded to the National Basketball Association's Most Valuable Player.</p>
+                                    </div>
+                                    <div class="sticky-item" data-item="1">
+                                        <p>SGA received 913 of a possible 1000 points from MVP voters, fueled by his 32.7 points per game that propelled the Thunder to a 68-14 record and the number one seed in the Western Conference.</p>
+                                    </div>
+                                    <div class="sticky-item" data-item="2">
+                                        <p>SGA would go on to lead the Thunder to a victory in the NBA Finals, becoming the 11th player to win both the regular season and Finals MVP awards in the same season. </p>
+                                    </div>
+                                </div>
+                                <div class="background-image">
+                                    <img src="assets/images/sga1.png" alt="SGA 1">
+                                </div>
                             </div>
                             <!-- Large spacer to keep background locked longer -->
                             <div style="height: 300vh;"></div>
@@ -69,36 +67,18 @@
                     <!-- Middle layer (all triggers) -->
                     <div class="parallax-layer layer-middle">
                         <!-- Add spacer at top so first block appears later -->
-                        <div style="height: 150vh;"></div>
-                        <div class="content-block" data-layer="middle" data-step="1">
+                        <div style="height: 50vh;"></div>
+                        <div class="content-block" data-layer="middle" data-step="0" style="background-image: url('assets/images/sga2.png');">
                             <h3>Middle 1</h3>
                             <p>Triggers left item 1 (transition from item 0 to item 1)</p>
                         </div>
-                        <div class="content-block" data-layer="middle" data-step="2">
+                        <div class="content-block" data-layer="middle" data-step="1" style="background-image: url('assets/images/sga4.png');">
                             <h3>Middle 2</h3>
                             <p>Triggers left item 2</p>
                         </div>
-                        <div class="content-block" data-layer="middle" data-step="3">
+                        <div class="content-block" data-layer="middle" data-step="2" style="background-image: url('assets/images/sga3.png');">
                             <h3>Middle 3</h3>
                             <p>Triggers left item 3</p>
-                        </div>
-                    </div>
-
-                    <!-- Foreground layer (no triggers) -->
-                    <div class="parallax-layer layer-front">
-                        <!-- Add spacer at top -->
-                        <div style="height: 200vh;"></div>
-                        <div class="content-block" data-layer="front">
-                            <h3>Front 1</h3>
-                            <p>No trigger</p>
-                        </div>
-                        <div class="content-block" data-layer="front">
-                            <h3>Front 2</h3>
-                            <p>No trigger</p>
-                        </div>
-                        <div class="content-block" data-layer="front">
-                            <h3>Front 3</h3>
-                            <p>No trigger</p>
                         </div>
                     </div>
 
