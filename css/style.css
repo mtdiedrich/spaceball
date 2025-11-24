@@ -59,6 +59,8 @@ html {
     background: #e0e0e0;
     color: #000;
     min-height: 100vh;
+    /* Ensure background extends to contain all content */
+    overflow: visible;
 }
 
 .two-column-container {
