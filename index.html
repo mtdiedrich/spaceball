@@ -6,6 +6,16 @@
     <title>Sit down. Stay a while.</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="css/style.css">
+    
+    <script type="importmap">
+    {
+        "imports": {
+            "d3": "https://cdn.jsdelivr.net/npm/d3@7.8.5/+esm",
+            "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm",
+            "gsap/ScrollTrigger": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger/+esm"
+        }
+    }
+    </script>
 </head>
 <body>
     <!-- Scene 1: Title -->
@@ -73,6 +83,6 @@
         </div>
     </section>
     
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="dist/main.js"></script>
 </body>
 </html>
